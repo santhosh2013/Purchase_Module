@@ -19,13 +19,10 @@ repositories {
 }
 
 dependencies {
-	val lombokVersion = "1.18.30"
-	compileOnly("org.projectlombok:lombok:$lombokVersion")
-	annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
-	implementation("org.springframework.boot:spring-boot-starter-validation")
+	//implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
+	//implementation("org.springframework.boot:spring-boot-starter-validation")
 	runtimeOnly("com.h2database:h2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
