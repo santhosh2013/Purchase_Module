@@ -1,0 +1,142 @@
+<div class="container mt-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2>
+        <i class="bi bi-handshake text-warning"></i>
+        Negotiations
+      </h2>
+      <p class="text-muted">Manage vendor negotiations (Created from Purchase Requests)</p>
+    </div>
+  </div>
+
+
+  <!-- Filters -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label for="filterStatus" class="form-label">
+            <i class="bi bi-funnel me-1"></i>Filter by Status
+          </label>
+          <select class="form-select" id="filterStatus" [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()">
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+                <div class="col-md-3">
+          <label for="filterEventName" class="form-label">
+            <i class="bi bi-funnel me-1"></i>Filter by Event Name
+          </label>
+          <input type="text" class="form-control" id="filterEventName" placeholder="Enter Event Name"
+            [(ngModel)]="filterEventName" (ngModelChange)="applyFilters()">
+        </div>
+
+        <div class="col-md-3">
+          <label for="filterVendorName" class="form-label">
+            <i class="bi bi-funnel me-1"></i>Filter by Vendor Name
+          </label>
+          <input type="text" class="form-control" id="filterVendorName" placeholder="Enter Vendor Name"
+            [(ngModel)]="filterVendorName" (ngModelChange)="applyFilters()">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">
+            <i class="bi bi-sort-down me-1"></i>Sort by Date
+          </label>
+          <button class="btn btn-outline-warning w-100" (click)="toggleSortOrder()">
+            <i class="bi" [ngClass]="sortOrder === 'asc' ? 'bi-sort-up' : 'bi-sort-down'"></i>
+            {{ sortOrder === 'asc' ? 'Oldest First' : 'Newest First' }}
+          </button>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+          <small class="text-muted">
+            Showing {{ filteredNegotiations.length }} of {{ negotiations.length }} negotiations
+          </small>
+          <button class="btn btn-secondary" (click)="clearFilters()">
+            <i class="bi bi-x-circle me-2"></i>Clear All Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-warning" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- No Data Message -->
+  <div *ngIf="!loading && filteredNegotiations.length === 0" class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>
+    {{ negotiations.length === 0 ? 'No negotiations found.' : 'No negotiations match the selected filters.' }}
+  </div>
+
+
+  <!-- Negotiations Table -->
+  <div *ngIf="!loading && filteredNegotiations.length > 0" class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-warning">
+            <tr>
+              <th>ID</th>
+              <th>Event Name</th>
+              <th>Vendor Name</th>
+              <th>Initial Quote</th>
+              <th>Final Amount</th>
+              <th>Savings</th>
+              <th>Negotiation Date</th>
+              <th>Status</th>
+              <th style="min-width: 150px;">Actions</th>
+            </tr>
+          </thead>
+
+
+          <tbody>
+            <tr *ngFor="let negotiation of filteredNegotiations">
+              <td>{{ negotiation.negotiationid }}</td>
+              <td>{{ negotiation.eventname }}</td>
+              <td>{{ negotiation.vendorname }}</td>
+              <td>₹{{ negotiation.initialquoteamount | number: '1.2-2' }}</td>
+
+              <td class="text-success fw-bold">
+                ₹{{ calculateSavings(negotiation.initialquoteamount, negotiation.finalamount) | number: '1.2-2' }}
+              </td>
+              <td>{{ negotiation.negotiationdate | date: 'MMM dd, yyyy' }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(negotiation.negotiationstatus)">
+                  {{ negotiation.negotiationstatus }}
+                </span>
+              </td>
+
+              <td>
+                <div class="d-flex gap-1">
+                  <!-- View Button - Always visible -->
+                  <button class="btn btn-sm btn-info" (click)="viewNegotiation(negotiation.negotiationid!)"
+                    title="View Negotiation">
+                    <i class="bi bi-eye"></i>
+                  </button>
+
+                  <!-- Edit Button - Hidden if Completed -->
+                  <button class="btn btn-sm btn-primary" *ngIf="negotiation.negotiationstatus !== 'Completed'"
+                    (click)="editNegotiation(negotiation.negotiationid!)" title="Edit Negotiation">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+
+
+                </div>
+              </td>
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

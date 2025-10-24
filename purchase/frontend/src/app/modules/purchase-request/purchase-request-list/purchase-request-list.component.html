@@ -1,0 +1,140 @@
+<div class="container mt-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h2>
+        <i class="bi bi-file-earmark-text text-info"></i>
+        Purchase Requests
+      </h2>
+      <p class="text-muted">Manage purchase requests for events</p>
+    </div>
+    <div class="col-md-4 text-end">
+      <button class="btn btn-info btn-lg" (click)="createNew()">
+        <i class="bi bi-plus-circle me-2"></i>
+        New Purchase Request
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label for="filterStatus" class="form-label">
+            <i class="bi bi-funnel me-1"></i>Filter by Status
+          </label>
+          <select class="form-select" id="filterStatus" [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()">
+            <option value="">All Statuses</option>
+            <option value="PENDING">PENDING</option>
+            <option value="APPROVED">APPROVED</option>
+            <option value="REJECTED">REJECTED</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="filterEventName" class="form-label">
+            <i class="bi bi-funnel me-1"></i>Filter by Event Name
+          </label>
+          <input type="text" class="form-control" id="filterEventName" placeholder="Enter Event Name"
+            [(ngModel)]="filterEventName" (ngModelChange)="applyFilters()">
+        </div>
+        <div class="col-md-3">
+          <label for="filterVendorName" class="form-label">
+            <i class="bi bi-funnel me-1"></i>Filter by Vendor Name
+          </label>
+          <input type="text" class="form-control" id="filterVendorName" placeholder="Enter Vendor Name"
+            [(ngModel)]="filterVendorName" (ngModelChange)="applyFilters()">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">
+            <i class="bi bi-sort-down me-1"></i>Sort by Date
+          </label>
+          <button class="btn btn-outline-info w-100" (click)="toggleSortOrder()">
+            <i class="bi" [ngClass]="sortOrder === 'asc' ? 'bi-sort-up' : 'bi-sort-down'"></i>
+            {{ sortOrder === 'asc' ? 'Oldest First' : 'Newest First' }}
+          </button>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+          <small class="text-muted">
+            Showing {{ filteredRequests.length }} of {{ purchaseRequests.length }} requests
+          </small>
+          <button class="btn btn-secondary" (click)="clearFilters()">
+            <i class="bi bi-x-circle me-2"></i>Clear All Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-info" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- No Data Message -->
+  <div *ngIf="!loading && filteredRequests.length === 0" class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>
+    {{ purchaseRequests.length === 0 ? 'No purchase requests found. Click "New Purchase Request" to create one.' : 'No
+    purchase requests match the selected filters.' }}
+  </div>
+
+  <!-- Purchase Requests Table -->
+  <div *ngIf="!loading && filteredRequests.length > 0" class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-info">
+            <tr>
+              <th>PR ID</th>
+              <th>Event Name</th>
+              <th>Vendor Name</th>
+              <th>CDSID</th>
+              <th>Request Date</th>
+              <th>Allocated Amount</th>
+              <th>Status</th>
+              <th style="min-width: 200px;">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let request of filteredRequests">
+              <td>{{ request.prid }}</td>
+              <td>{{ request.eventname }}</td>
+              <td>{{ request.vendorname }}</td>
+              <td>{{ request.cdsid }}</td>
+              <td>{{ request.requestdate | date: 'MMM dd, yyyy' }}</td>
+              <td>₹{{ request.allocatedamount | number: '1.2-2' }}</td>
+
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(request.prstatus)">
+                  {{ request.prstatus }}
+                </span>
+              </td>
+
+              <td>
+                <div class="d-flex gap-1 flex-wrap">
+                  <!-- View Button - Always visible -->
+                  <button class="btn btn-sm btn-info" (click)="viewPurchaseRequest(request.prid!)"
+                    title="View Purchase Request">
+                    <i class="bi bi-eye"></i>
+                  </button>
+
+                  <!-- Negotiate Button - Only for PENDING -->
+                  <button class="btn btn-sm btn-success" *ngIf="request.prstatus === 'PENDING'"
+                    (click)="createNegotiationFromPR(request.prid!)" title="Create Negotiation from this PR">
+                    <i class="bi bi-arrow-right-circle me-1"></i>Negotiate
+                  </button>
+                </div>
+              </td>
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
