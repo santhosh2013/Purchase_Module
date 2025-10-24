@@ -1,0 +1,191 @@
+<div class="container mt-4">
+  <!-- Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2>
+        <i class="bi bi-receipt text-success"></i>
+        Purchase Orders
+      </h2>
+      <p class="text-muted">Manage purchase orders (Auto-generated from Completed Negotiations)</p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label for="filterStatus" class="form-label">
+            <i class="bi bi-funnel me-1"></i>Filter by Status
+          </label>
+          <select class="form-select" id="filterStatus" [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()">
+            <option value="">All Statuses</option>
+            <option value="PENDING">PENDING</option>
+            <option value="COMPLETED">COMPLETED</option>
+            <option value="REJECTED">REJECTED</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="filterEventId" class="form-label">
+            <i class="bi bi-funnel me-1"></i>Filter by Event ID
+          </label>
+          <input type="number" class="form-control" id="filterEventId" placeholder="Enter Event ID"
+            [(ngModel)]="filterEventId" (ngModelChange)="applyFilters()">
+        </div>
+        <div class="col-md-3">
+          <label for="filterVendorName" class="form-label">
+            <i class="bi bi-funnel me-1"></i>Filter by Vendor Name
+          </label>
+          <input type="text" class="form-control" id="filterVendorName" 
+                 placeholder="Enter Vendor Name" 
+                 [(ngModel)]="filterVendorName" 
+                 (ngModelChange)="applyFilters()">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">
+            <i class="bi bi-sort-down me-1"></i>Sort by Date
+          </label>
+          <button class="btn btn-outline-success w-100" (click)="toggleSortOrder()">
+            <i class="bi" [ngClass]="sortOrder === 'asc' ? 'bi-sort-up' : 'bi-sort-down'"></i>
+            {{ sortOrder === 'asc' ? 'Oldest First' : 'Newest First' }}
+          </button>
+        </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+          <small class="text-muted">
+            Showing {{ filteredOrders.length }} of {{ purchaseOrders.length }} orders
+          </small>
+          <button class="btn btn-secondary" (click)="clearFilters()">
+            <i class="bi bi-x-circle me-2"></i>Clear All Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="text-center my-5">
+    <div class="spinner-border text-success" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <!-- No Data Message -->
+  <div *ngIf="!loading && filteredOrders.length === 0" class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>
+    {{ purchaseOrders.length === 0 ? 'No purchase orders found.' : 'No purchase orders match the selected filters.' }}
+  </div>
+
+  <!-- Purchase Orders Table -->
+  <div *ngIf="!loading && filteredOrders.length > 0" class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-success">
+            <tr>
+              <th>PO ID</th>
+              <th>Event ID</th>
+              <th>Event Name</th>
+              <th>Vendor ID</th>
+              <th>Vendor Name</th>
+              <th>Order Date</th>
+              <th>Amount (INR)</th>
+              <th>Amount ($)</th>
+              <th>Status</th>
+              <th style="min-width: 400px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of filteredOrders">
+              <td>{{ order.po_id }}</td>
+              <td>{{ order.eventid }}</td>
+              <td>{{ order.eventname }}</td>
+              <td>{{ order.vendorid }}</td>
+              <td>{{ order.vendorname }}</td>
+              <td>{{ order.orderdate | date: 'MMM dd, yyyy' }}</td>
+              <td>₹{{ order.orderamountINR | number: '1.2-2' }}</td>
+              <td>${{ order.orderamountdollar | number: '1.2-2' }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(order.po_status || 'PENDING')">
+                  {{ order.po_status || 'PENDING' }}
+                </span>
+              </td>
+              <td>
+                <div class="d-flex gap-1 flex-wrap">
+                  <!-- Eye Icon - View Form (Read-only) -->
+                  <button class="btn btn-sm btn-info" 
+                          (click)="viewPurchaseOrder(order.po_id!)"
+                          [disabled]="!order.po_id" 
+                          title="View Purchase Order Form">
+                    <i class="bi bi-eye"></i>
+                  </button>
+
+                  <!-- Edit Button -->
+                  <button class="btn btn-sm btn-primary" 
+                          (click)="editPurchaseOrder(order.po_id!)"
+                          [disabled]="!order.po_id" 
+                          title="Edit Purchase Order">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+
+                  <!-- ONLY SHOW VIEW PDF AND MAIL BUTTONS IF STATUS IS NOT PENDING -->
+                  <ng-container *ngIf="order.po_status !== 'PENDING'">
+                    
+                    <!-- If PO is COMPLETED - Show View PDF and Mail buttons -->
+                    <ng-container *ngIf="order.po_status === 'COMPLETED'">
+                      <!-- View PDF Button -->
+                      <button class="btn btn-sm btn-success" 
+                              (click)="viewPDF_LD(order)" 
+                              [disabled]="!order.po_id"
+                              title="View PDF">
+                        <i class="bi bi-file-pdf me-1"></i>View
+                      </button>
+
+                      <!-- Mail L&D -->
+                      <button class="btn btn-sm btn-warning" 
+                              (click)="emailToLD_Completed(order)"
+                              [disabled]="!order.po_id" 
+                              title="Email to L&D (ak82@ford.com)">
+                        <i class="bi bi-envelope me-1"></i>Mail[L&D]
+                      </button>
+
+                      <!-- Mail Vendor -->
+                      <button class="btn btn-sm btn-secondary" 
+                              (click)="emailToVendor(order)" 
+                              [disabled]="!order.po_id"
+                              title="Email to Vendor (ka35@ford.com)">
+                        <i class="bi bi-envelope me-1"></i>Mail[Vendor]
+                      </button>
+
+                      <!-- Mail Scheduler & Delivery -->
+                      <button class="btn btn-sm btn-dark" 
+                              (click)="emailToScheduler(order)" 
+                              [disabled]="!order.po_id"
+                              title="Email to Scheduler & Delivery (dn27@ford.com)">
+                        <i class="bi bi-calendar-check me-1"></i>Mail[Scheduler]
+                      </button>
+                    </ng-container>
+
+                    <!-- If PO is REJECTED - Show only L&D cancelled mail -->
+                    <ng-container *ngIf="order.po_status === 'REJECTED'">
+                      <!-- Mail L&D - Rejected -->
+                      <button class="btn btn-sm btn-danger" 
+                              (click)="emailToLD_Cancelled(order)" 
+                              [disabled]="!order.po_id"
+                              title="Email to L&D - PO Rejected">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Mail[L&D] - REJECTED
+                      </button>
+                    </ng-container>
+                    
+                  </ng-container>
+                  <!-- PENDING status: Only Eye icon and Edit buttons visible -->
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

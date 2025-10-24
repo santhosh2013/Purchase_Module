@@ -1,0 +1,82 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-12 text-center mb-5">
+      <img src="ford-logo.png" alt="Ford Logo" style="height: 80px; width: auto;" class="mb-3">
+      <h1 class="display-4">
+        Ford Purchase Management System
+      </h1>
+      <p class="lead text-muted">Streamline your procurement process</p>
+    </div>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <!-- Purchase Requests Card -->
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm border-0 hover-card">
+        <div class="card-body text-center p-4">
+          <div class="mb-3">
+            <i class="bi bi-file-earmark-text display-1 text-info"></i>
+          </div>
+          <h5 class="card-title">Purchase Requests</h5>
+          <p class="card-text text-muted">
+            Create and manage purchase requests for your events and projects.
+          </p>
+          <button class="btn btn-info btn-lg w-100" (click)="navigateToPurchaseRequests()">
+            <i class="bi bi-eye me-2"></i>View Requests
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Negotiations Card -->
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm border-0 hover-card">
+        <div class="card-body text-center p-4">
+          <div class="mb-3">
+            <i class="bi bi-handshake display-1 text-warning"></i>
+          </div>
+          <h5 class="card-title">Negotiations</h5>
+          <p class="card-text text-muted">
+            Track and manage vendor negotiations to get the best deals.
+          </p>
+          <button class="btn btn-warning btn-lg w-100" (click)="navigateToNegotiations()">
+            <i class="bi bi-eye me-2"></i>View Negotiations
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase Orders Card -->
+    <div class="col-md-4">
+      <div class="card h-100 shadow-sm border-0 hover-card">
+        <div class="card-body text-center p-4">
+          <div class="mb-3">
+            <i class="bi bi-receipt display-1 text-success"></i>
+          </div>
+          <h5 class="card-title">Purchase Orders</h5>
+          <p class="card-text text-muted">
+            Generate and track purchase orders for approved requests.
+          </p>
+          <button class="btn btn-success btn-lg w-100" (click)="navigateToPurchaseOrders()">
+            <i class="bi bi-eye me-2"></i>View Orders
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer with Copyright -->
+  <footer class="mt-5 pt-4 border-top">
+    <div class="row">
+      <div class="col-12 text-center">
+        <p class="text-muted mb-1">
+          <i class="bi bi-c-circle me-1"></i>
+          {{ currentYear }} Ford Motor Company. All rights reserved.
+        </p>
+        <p class="text-muted small mb-0">
+          Purchase Management System | Version 1.0
+        </p>
+      </div>
+    </div>
+  </footer>
+</div>
