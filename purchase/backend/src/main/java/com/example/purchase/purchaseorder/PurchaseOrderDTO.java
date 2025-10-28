@@ -1,25 +1,55 @@
 package com.example.purchase.purchaseorder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.*;
 import java.util.Date;
 
 public class PurchaseOrderDTO {
     @JsonProperty("po_id")
     private Integer PO_id;
     
+    @NotNull(message = "Event ID is required")
+    @Positive(message = "Event ID must be positive")
     private Integer eventid;
+
+    @NotBlank(message = "Event name is required")
+    @Size(max = 255, message = "Event name must not exceed 255 characters")
     private String eventname;
+
+    @NotNull(message = "Vendor ID is required")
+    @Positive(message = "Vendor ID must be positive")
     private Integer vendorid;
+
+    @NotBlank(message = "Vendor name is required")
+    @Size(max = 255, message = "Vendor name must not exceed 255 characters")
     private String vendorname;
+
+    @NotBlank(message = "CDSID is required")
+    @Size(min = 1, max = 50, message = "CDSID must be between 1 and 50 characters")
+    @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "CDSID can only contain alphanumeric characters, hyphens, and underscores")
     private String cdsid;
+
+    @NotNull(message = "Order date is required")
+    @PastOrPresent(message = "Order date cannot be in the future")
     private Date orderdate;
+
+    @DecimalMin(value = "0.0", inclusive = false, message = "Order amount in INR must be greater than 0")
+    @Digits(integer = 10, fraction = 2, message = "Order amount in INR must have at most 10 integer digits and 2 decimal places")
     private Double orderamountINR;
+
+    @DecimalMin(value = "0.0", inclusive = false, message = "Order amount in USD must be greater than 0")
+    @Digits(integer = 10, fraction = 2, message = "Order amount in USD must have at most 10 integer digits and 2 decimal places")
     private Double orderamountdollar;
     
     @JsonProperty("po_status")
+    @NotBlank(message = "Purchase Order status is required")
+    @Pattern(regexp = "^(PENDING|COMPLETED|REJECTED)$", message = "Status must be PENDING, COMPLETED, or REJECTED")
     private String PO_status;
     
+    @Positive(message = "Purchase Request ID must be positive")
     private Integer prid;
+
+    @Positive(message = "Negotiation ID must be positive")
     private Integer negotiationid;
 
     public PurchaseOrderDTO() {

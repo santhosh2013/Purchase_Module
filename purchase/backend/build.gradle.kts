@@ -40,20 +40,19 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 
-	// ============================================
 	// OpenAPI/Swagger Documentation
-	// ============================================
+
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
 
-	// ============================================
+
 	// Development Tools
-	// ============================================
+
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
-	// ============================================
 	// Testing
-	// ============================================
+
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {
@@ -74,19 +73,19 @@ tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
 	archiveFileName.set("purchase-management-${project.version}.jar")
 }
 
-// Print startup message
-tasks.register("info") {
-	doLast {
-		println("""
-            ════════════════════════════════════════════════════════════
-                    Purchase Management System - Build Info
-            ════════════════════════════════════════════════════════════
-            Project       : ${project.name}
-            Version       : ${project.version}
-            Java Version  : ${java.sourceCompatibility}
-            Spring Boot   : 3.2.1
-            Database      : H2 (In-Memory)
-            ════════════════════════════════════════════════════════════
-        """.trimIndent())
-	}
-}
+//// Print startup message
+//tasks.register("info") {
+//	doLast {
+//		println("""
+//            ════════════════════════════════════════════════════════════
+//                    Purchase Management System - Build Info
+//            ════════════════════════════════════════════════════════════
+//            Project       : ${project.name}
+//            Version       : ${project.version}
+//            Java Version  : ${java.sourceCompatibility}
+//            Spring Boot   : 3.2.1
+//            Database      : H2 (In-Memory)
+//            ════════════════════════════════════════════════════════════
+//        """.trimIndent())
+//	}
+//}

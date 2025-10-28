@@ -3,42 +3,61 @@ package com.example.purchase.purchaseorder;
 import com.example.purchase.negotiation.Negotiation;
 import com.example.purchase.purchaserequest.PurchaseRequest;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
+@Getter
+@Setter
 
 @Entity
 @Table(name = "purchase_order")
 public class PurchaseOrder {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PO_ID")
     private Integer PO_id;
 
-    @Column(name = "EVENTID")
+    @NotNull(message = "Event ID is required")
+    @Positive(message = "Event ID must be positive")
     private Integer eventid;
 
-    @Column(name = "EVENTNAME")
+    @NotBlank(message = "Event name is required")
+    @Size(max = 255, message = "Event name must not exceed 255 characters")
     private String eventname;
 
-    @Column(name = "VENDORID")
+    @NotNull(message = "Vendor ID is required")
+    @Positive(message = "Vendor ID must be positive")
     private Integer vendorid;
 
-    @Column(name = "VENDORNAME")
+    @NotBlank(message = "Vendor name is required")
+    @Size(max = 255, message = "Vendor name must not exceed 255 characters")
     private String vendorname;
 
-    @Column(name = "CDSID", nullable = false, length = 50)
+    @NotBlank(message = "CDSID is required")
+    @Size(min = 1, max = 50, message = "CDSID must be between 1 and 50 characters")
+    @Pattern(regexp = "^[A-Za-z0-9_-]+$", message = "CDSID can only contain alphanumeric characters, hyphens, and underscores")
+    @Column( nullable = false, length = 50)
     private String cdsid;
 
-    @Column(name = "ORDERDATE")
+    @NotNull(message = "Order date is required")
+    @PastOrPresent(message = "Order date cannot be in the future")
     private Date orderdate;
 
-    @Column(name = "ORDERAMOUNTINR")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Order amount in INR must be greater than 0")
+    @Digits(integer = 10, fraction = 2, message = "Order amount in INR must have at most 10 integer digits and 2 decimal places")
     private Double orderamountINR;
 
-    @Column(name = "ORDERAMOUNTDOLLAR")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Order amount in USD must be greater than 0")
+    @Digits(integer = 10, fraction = 2, message = "Order amount in USD must have at most 10 integer digits and 2 decimal places")
+
     private Double orderamountdollar;
 
-    @Column(name = "PO_STATUS")
+    @NotBlank(message = "Purchase Order status is required")
+    @Pattern(regexp = "^(PENDING|COMPLETED|REJECTED)$", message = "Status must be PENDING, COMPLETED, or REJECTED")
+
     private String PO_status;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -70,85 +89,6 @@ public class PurchaseOrder {
         this.negotiation = negotiation;
     }
 
-    public Integer getPO_id() {
-        return PO_id;
-    }
-
-    public void setPO_id(Integer PO_id) {
-        this.PO_id = PO_id;
-    }
-
-    public Integer getEventid() {
-        return eventid;
-    }
-
-    public void setEventid(Integer eventid) {
-        this.eventid = eventid;
-    }
-
-    public String getEventname() {
-        return eventname;
-    }
-
-    public void setEventname(String eventname) {
-        this.eventname = eventname;
-    }
-
-    public Integer getVendorid() {
-        return vendorid;
-    }
-
-    public void setVendorid(Integer vendorid) {
-        this.vendorid = vendorid;
-    }
-
-    public String getVendorname() {
-        return vendorname;
-    }
-
-    public void setVendorname(String vendorname) {
-        this.vendorname = vendorname;
-    }
-
-    public String getCdsid() {
-        return cdsid;
-    }
-
-    public void setCdsid(String cdsid) {
-        this.cdsid = cdsid;
-    }
-
-    public Date getOrderdate() {
-        return orderdate;
-    }
-
-    public void setOrderdate(Date orderdate) {
-        this.orderdate = orderdate;
-    }
-
-    public Double getOrderamountINR() {
-        return orderamountINR;
-    }
-
-    public void setOrderamountINR(Double orderamountINR) {
-        this.orderamountINR = orderamountINR;
-    }
-
-    public Double getOrderamountdollar() {
-        return orderamountdollar;
-    }
-
-    public void setOrderamountdollar(Double orderamountdollar) {
-        this.orderamountdollar = orderamountdollar;
-    }
-
-    public String getPO_status() {
-        return PO_status;
-    }
-
-    public void setPO_status(String PO_status) {
-        this.PO_status = PO_status;
-    }
 
     public PurchaseRequest getpurchaserequest() {
         return purchaserequest;

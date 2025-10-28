@@ -20,40 +20,6 @@ public class PurchaseOrderController {
     @Autowired
     private PurchaseOrderService purchaseOrderService;
 
-    @GetMapping
-    @Operation(summary = "Get all purchase orders")
-    public ResponseEntity<List<PurchaseOrderDTO>> getAllPurchaseOrders() {
-        return ResponseEntity.ok(purchaseOrderService.getAllPurchaseOrders());
-    }
-
-    @GetMapping("/{id}")
-    @Operation(summary = "Get purchase order by ID")
-    public ResponseEntity<PurchaseOrderDTO> getPurchaseOrderById(
-            @PathVariable @Parameter(description = "Purchase Order ID") Integer id) {
-        return ResponseEntity.ok(purchaseOrderService.getPurchaseOrderById(id));
-    }
-
-    @GetMapping("/status/{status}")
-    @Operation(summary = "Get purchase orders by status")
-    public ResponseEntity<List<PurchaseOrderDTO>> getPurchaseOrdersByStatus(
-            @PathVariable @Parameter(description = "Status (COMPLETED, REJECTED)") String status) {
-        return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByStatus(status));
-    }
-
-    @GetMapping("/vendor/{vendorid}")
-    @Operation(summary = "Get purchase orders by vendor ID")
-    public ResponseEntity<List<PurchaseOrderDTO>> getPurchaseOrdersByVendor(
-            @PathVariable @Parameter(description = "Vendor ID") Integer vendorid) {
-        return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByVendor(vendorid));
-    }
-
-    @GetMapping("/vendor/{vendorid}/total")
-    @Operation(summary = "Get total order amount by vendor")
-    public ResponseEntity<Double> getTotalOrderAmountByVendor(
-            @PathVariable @Parameter(description = "Vendor ID") Integer vendorid) {
-        return ResponseEntity.ok(purchaseOrderService.getTotalOrderAmountByVendor(vendorid));
-    }
-
     @GetMapping("/event/{eventid}")
     @Operation(summary = "Get purchase orders by event ID")
     public ResponseEntity<List<PurchaseOrderDTO>> getPurchaseOrdersByEvent(
@@ -85,12 +51,6 @@ public class PurchaseOrderController {
         return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByDateRange(fromDate, toDate));
     }
 
-    @GetMapping("/completed")
-    @Operation(summary = "Get all completed purchase orders")
-    public ResponseEntity<List<PurchaseOrderDTO>> getCompletedPurchaseOrders() {
-        return ResponseEntity.ok(purchaseOrderService.getCompletedPurchaseOrders());
-    }
-
     @PostMapping
     @Operation(summary = "Create new purchase order")
     public ResponseEntity<PurchaseOrderDTO> createPurchaseOrder(@RequestBody PurchaseOrderDTO dto) {
@@ -104,16 +64,66 @@ public class PurchaseOrderController {
         return ResponseEntity.ok(purchaseOrderService.updatePurchaseOrder(id, dto));
     }
 
-    @PutMapping("/{id}/complete")
-    @Operation(summary = "Mark purchase order as completed")
-    public ResponseEntity<PurchaseOrderDTO> completePurchaseOrder(@PathVariable Integer id) {
-        return ResponseEntity.ok(purchaseOrderService.completePurchaseOrder(id));
+
+    @GetMapping
+    @Operation(summary = "Get all purchase orders")
+    public ResponseEntity<List<PurchaseOrderDTO>> getAllPurchaseOrders()
+    {
+        return ResponseEntity.ok(purchaseOrderService.getAllPurchaseOrders());
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get purchase order by ID")
+    public ResponseEntity<PurchaseOrderDTO> getPurchaseOrderById(
+            @PathVariable @Parameter(description = "Purchase Order ID") Integer id)
+            throws InvalidInputException
+    {
+        return ResponseEntity.ok(purchaseOrderService.getPurchaseOrderById(id));
+    }
+
+    @GetMapping("/status/{status}")
+    @Operation(summary = "Get purchase orders by status")
+    public ResponseEntity<List<PurchaseOrderDTO>> getPurchaseOrdersByStatus(
+            @PathVariable @Parameter(description = "Status (COMPLETED, REJECTED)") String status)
+            throws InvalidStatusException
+    {
+        return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByStatus(status));
+    }
+
+    @GetMapping("/vendor/{vendorid}")
+    @Operation(summary = "Get purchase orders by vendor ID")
+    public ResponseEntity<List<PurchaseOrderDTO>> getPurchaseOrdersByVendor(
+            @PathVariable @Parameter(description = "Vendor ID") Integer vendorid)
+            throws InvalidInputException
+    {
+        return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByVendor(vendorid));
+    }
+
+    @GetMapping("/completed")
+    @Operation(summary = "Get all completed purchase orders")
+    public ResponseEntity<List<PurchaseOrderDTO>> getCompletedPurchaseOrders() throws DataNotFoundException {
+        return ResponseEntity.ok(purchaseOrderService.getCompletedPurchaseOrders());
+    }
+
+    @GetMapping("/vendor/{vendorid}/total")
+    @Operation(summary = "Get total order amount by vendor")
+    public ResponseEntity<Double> getTotalOrderAmountByVendor(
+            @PathVariable @Parameter(description = "Vendor ID") Integer vendorid)
+            throws InvalidInputException
+    {
+        return ResponseEntity.ok(purchaseOrderService.getTotalOrderAmountByVendor(vendorid));
     }
 
     @PutMapping("/{id}/reject")
     @Operation(summary = "Mark purchase order as rejected")
     public ResponseEntity<PurchaseOrderDTO> rejectPurchaseOrder(@PathVariable Integer id) {
         return ResponseEntity.ok(purchaseOrderService.rejectPurchaseOrder(id));
+    }
+
+    @PutMapping("/{id}/complete")
+    @Operation(summary = "Mark purchase order as completed")
+    public ResponseEntity<PurchaseOrderDTO> completePurchaseOrder(@PathVariable Integer id) {
+        return ResponseEntity.ok(purchaseOrderService.completePurchaseOrder(id));
     }
 
     @DeleteMapping("/{id}")

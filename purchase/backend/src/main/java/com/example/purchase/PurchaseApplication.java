@@ -8,7 +8,6 @@ public class PurchaseApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(PurchaseApplication.class, args);
-		System.out.println("✅ Purchase Management System - Backend Started Successfully!");
-		System.out.println("🔗 API Documentation: http://localhost:8080/swagger-ui.html");
+
 	}
 }
