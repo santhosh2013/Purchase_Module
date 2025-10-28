@@ -80,7 +80,7 @@ public class PurchaseOrder {
         this.eventname = eventname;
         this.vendorid = vendorid;
         this.vendorname = vendorname;
-        this.cdsid = cdsid;
+        this.cdsid = cdsid; //cdsid
         this.orderdate = orderdate;
         this.orderamountINR = orderamountINR;
         this.orderamountdollar = orderamountdollar;
