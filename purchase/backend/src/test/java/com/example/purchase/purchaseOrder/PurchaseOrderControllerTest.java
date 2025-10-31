@@ -109,6 +109,92 @@ public class PurchaseOrderControllerTest {
         assertEquals("PENDING", response.getBody().get(0).getPO_status());
         assertEquals(mockPurchaseOrderList, response.getBody());
     }
+    @Test
+    void getPurchaseOrdersByYearTest(){
+        when(purchaseOrderService.getPurchaseOrdersByYear(2025)).thenReturn(mockPurchaseOrderList);
+
+        ResponseEntity<List<PurchaseOrderDTO>> response = purchaseOrderController.getPurchaseOrdersByYear(2025);
+
+        assertEquals("PENDING", response.getBody().get(0).getPO_status());
+        assertEquals(mockPurchaseOrderList, response.getBody());
+
+    }
+
+    @Test
+    void getPurchaseOrdersByDateRange(){
+        when(purchaseOrderService.getPurchaseOrdersByDateRange(any(Date.class), any(Date.class))).thenReturn(mockPurchaseOrderList);
+
+        ResponseEntity<List<PurchaseOrderDTO>> response= purchaseOrderController.getPurchaseOrdersByDateRange(new Date(),new Date());
+        assertEquals("PENDING", response.getBody().get(0).getPO_status());
+        assertEquals(mockPurchaseOrderList, response.getBody());
+
+    }
+
+    @Test
+    void getAllPurchaseOrders(){
+        when(purchaseOrderService.getAllPurchaseOrders()).thenReturn(mockPurchaseOrderList);
+
+        ResponseEntity<List<PurchaseOrderDTO>> response= purchaseOrderController.getAllPurchaseOrders();
+
+        assertEquals("PENDING", response.getBody().get(0).getPO_status());
+        assertEquals(1,response.getBody().size());
+    }
+
+    @Test
+     void getPurchaseOrderById() throws InvalidInputException {
+        when(purchaseOrderService.getPurchaseOrderById(1)).thenReturn(mockPurchaseOrderDTO);
+
+        ResponseEntity<PurchaseOrderDTO> response = purchaseOrderController.getPurchaseOrderById(1);
+
+        assertEquals("PENDING", response.getBody().getPO_status());
+        assertEquals(mockPurchaseOrderDTO, response.getBody());
+    }
+    @Test
+    void getPurchaseOrdersByStatus() throws InvalidStatusException {
+        when(purchaseOrderService.getPurchaseOrdersByStatus("PENDING")).thenReturn(mockPurchaseOrderList);
+
+        ResponseEntity<List<PurchaseOrderDTO>> response = purchaseOrderController.getPurchaseOrdersByStatus("PENDING");
+
+        assertEquals("PENDING", response.getBody().get(0).getPO_status());
+        assertEquals(mockPurchaseOrderList, response.getBody());
+    }
+
+    @Test
+    void getPurchaseOrdersByVendor() throws InvalidInputException {
+        when(purchaseOrderService.getPurchaseOrdersByVendor(1)).thenReturn(mockPurchaseOrderList);
+
+        ResponseEntity<List<PurchaseOrderDTO>> response = purchaseOrderController.getPurchaseOrdersByVendor(1);
+
+        assertEquals("PENDING", response.getBody().get(0).getPO_status());
+        assertEquals(mockPurchaseOrderList, response.getBody());
+
+    }
+    @Test
+  void completePurchaseOrder() throws InvalidInputException {
+        PurchaseOrderDTO completedDTO=new PurchaseOrderDTO();
+        completedDTO.setPO_id(1);
+        completedDTO.setPO_status("COMPLETED");
+        completedDTO.setCdsid("AK123");
+        completedDTO.setEventid(121);
+        completedDTO.setEventname("Java Fullstack");
+        completedDTO.setOrderdate(new Date(2025-4-03));
+        completedDTO.setPrid(1);
+        when(purchaseOrderService.completePurchaseOrder(1)).thenReturn(completedDTO);
+
+        ResponseEntity<PurchaseOrderDTO> response = purchaseOrderController.completePurchaseOrder(1);
+
+        assertEquals("COMPLETED", response.getBody().getPO_status());
+        assertEquals(completedDTO, response.getBody());
+        assertEquals("Java Fullstack", response.getBody().getEventname());
+    }
+
+    @Test
+    void deletePurchaseOrder(){
+        ResponseEntity<Void> response = purchaseOrderController.deletePurchaseOrder(1);
+        assertEquals(204, response.getStatusCodeValue());
+    }
+
+
 
 
 

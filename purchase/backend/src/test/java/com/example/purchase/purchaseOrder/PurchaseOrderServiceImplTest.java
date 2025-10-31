@@ -222,6 +222,98 @@ class PurchaseOrderServiceImplTest {
         assertEquals("COMPLETED", result.get(0).getPO_status());
     }
 */
+@Test
+    void getPurchaseOrdersByEvent() throws InvalidInputException {
+    when(purchaseOrderRepository.findByEventid(1)).thenReturn(purchaseOrders);
 
+    List<PurchaseOrderDTO> result=purchaseOrderService.getPurchaseOrdersByEvent(1);
+
+    assertEquals(1, result.size());
+    assertEquals("PENDING", result.get(0).getPO_status());
 
 }
+@Test
+    void getPurchaseOrdersByEventFails() {
+    assertThrows(InvalidInputException.class,()->purchaseOrderService.getPurchaseOrdersByEvent(2));
+}
+
+
+
+    @Test
+    void getPurchaseOrdersTest() throws InvalidInputException {
+        when(purchaseOrderRepository.findByCdsid("CDS123")).thenReturn(purchaseOrders);
+
+        List<PurchaseOrderDTO> result = purchaseOrderService.getPurchaseOrdersByCdsid("CDS123");
+
+        assertEquals(1, result.size());
+        assertEquals("CDS123", result.get(0).getCdsid());
+        assertEquals("PENDING", result.get(0).getPO_status());
+        assertEquals(1001, result.get(0).getVendorid());
+    }
+
+    @Test
+    void getPurchaseOrdersByCdsidNotFound() {
+        when(purchaseOrderRepository.findByCdsid("INVALID123")).thenReturn(Collections.emptyList());
+
+        assertThrows(InvalidInputException.class,
+                () -> purchaseOrderService.getPurchaseOrdersByCdsid("INVALID123"));
+    }
+
+    @Test
+
+    void getPurchaseOrdersByYear(){
+    when(purchaseOrderRepository.findByYear(2016)).thenReturn(purchaseOrders);
+
+    List<PurchaseOrderDTO> result=purchaseOrderService.getPurchaseOrdersByYear(2016);
+
+    assertEquals(1, result.size());
+    assertEquals("CDS123", result.get(0).getCdsid());
+    assertEquals(1001, result.get(0).getVendorid());
+    }
+
+    @Test
+    void getPurchaseOrdersByDateRange(){
+    when(purchaseOrderRepository.findByDateRange(
+            Date.from(LocalDate.of(2024,1,1).atStartOfDay(ZoneId.systemDefault()).toInstant()),
+            Date.from(LocalDate.of(2024,12,31).atStartOfDay(ZoneId.systemDefault()).toInstant())
+    )).thenReturn(purchaseOrders);
+
+    List<PurchaseOrderDTO> result=purchaseOrderService.getPurchaseOrdersByDateRange(
+            Date.from(LocalDate.of(2024,1,1).atStartOfDay(ZoneId.systemDefault()).toInstant()),
+            Date.from(LocalDate.of(2024,12,31).atStartOfDay(ZoneId.systemDefault()).toInstant())
+    );
+
+    assertEquals(1, result.size());
+    assertEquals("CDS123", result.get(0).getCdsid());
+    }
+
+    @Test
+    void rejectPurchaseOrder() throws InvalidInputException {
+    when(purchaseOrderRepository.save(any(PurchaseOrder.class))).thenReturn(purchaseOrders.get(0));
+    when(purchaseOrderRepository.findById(1)).thenReturn(Optional.of(purchaseOrders.get(0)));
+
+    Optional<PurchaseOrder> result = purchaseOrderRepository.findById(1);
+    result.get().setPO_status("REJECTED");
+    purchaseOrderService.rejectPurchaseOrder(1);
+    assertEquals("REJECTED", result.get().getPO_status());
+    }
+
+    @Test
+    void getCompletedPurchaseOrders() throws DataNotFoundException {
+    when(purchaseOrderRepository.findCompletedOrders()).thenReturn(purchaseOrders);
+
+    List<PurchaseOrderDTO> result=purchaseOrderService.getCompletedPurchaseOrders();
+
+    assertEquals(1, result.size());
+    assertEquals("PENDING", result.get(0).getPO_status());
+    assertEquals(1001, result.get(0).getVendorid());
+
+
+    }
+
+}
+
+
+
+
+
