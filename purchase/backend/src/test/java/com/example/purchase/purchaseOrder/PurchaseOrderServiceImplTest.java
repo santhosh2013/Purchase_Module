@@ -1,4 +1,4 @@
-package com.example.purchase;
+package com.example.purchase.purchaseOrder;
 
 import com.example.purchase.purchaseorder.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -109,11 +109,13 @@ class PurchaseOrderServiceImplTest {
     }
 
     @Test
-    void completePurchaseOrderTest() {
+    void completePurchaseOrderTest() throws InvalidInputException {
         when(purchaseOrderRepository.findById(1)).thenReturn(Optional.of(purchaseOrders.get(0)));
+        when(purchaseOrderRepository.save(any(PurchaseOrder.class))).thenReturn(purchaseOrders.get(0));
         Optional<PurchaseOrder> result = purchaseOrderRepository.findById(1);
-        result.get().setPO_status("COMPLETED");
-        assertEquals("COMPLETED", result.get().getPO_status());
+        PurchaseOrderDTO result1=purchaseOrderService.completePurchaseOrder(1);
+        result1.setPO_status("COMPLETED");
+        assertEquals("COMPLETED", result1.getPO_status());
     }
 
     @Test
@@ -122,6 +124,47 @@ class PurchaseOrderServiceImplTest {
         Optional<PurchaseOrder> result = purchaseOrderRepository.findById(1);
         result.get().setPO_status("REJECTED");
         assertEquals("REJECTED", result.get().getPO_status());
+    }
+
+    @Test
+    void createPurchaseOrderTest() throws InvalidInputException {
+        // Arrange - Fix: Provide both INR and USD amounts as required by service validation
+        PurchaseOrderDTO inputDTO = new PurchaseOrderDTO();
+        inputDTO.setEventid(101);
+        inputDTO.setEventname("Java Fullstack");
+        inputDTO.setVendorid(1001);
+        inputDTO.setVendorname("Tech Solutions");
+        inputDTO.setCdsid("CDS123");
+        inputDTO.setOrderdate(new Date());
+        inputDTO.setOrderamountINR(415000.0); // Provide INR amount
+        inputDTO.setOrderamountdollar(5000.0); // Provide USD amount (both required)
+        inputDTO.setPO_status("PENDING");
+
+        PurchaseOrder savedPO = new PurchaseOrder();
+        savedPO.setPO_id(1);
+        savedPO.setEventid(101);
+        savedPO.setEventname("Java Fullstack");
+        savedPO.setVendorid(1001);
+        savedPO.setVendorname("Tech Solutions");
+        savedPO.setCdsid("CDS123");
+        savedPO.setOrderdate(inputDTO.getOrderdate());
+        savedPO.setOrderamountINR(415000.0);
+        savedPO.setOrderamountdollar(5000.0);
+        savedPO.setPO_status("PENDING");
+
+        when(purchaseOrderRepository.save(any(PurchaseOrder.class))).thenReturn(savedPO);
+
+        // Act
+        PurchaseOrderDTO result = purchaseOrderService.createPurchaseOrder(inputDTO);
+
+        // Assert
+        assertEquals(1, result.getPO_id());
+        assertEquals("Java Fullstack", result.getEventname());
+        assertEquals(1001, result.getVendorid());
+        assertEquals(415000.0, result.getOrderamountINR());
+        assertEquals(5000.0, result.getOrderamountdollar());
+        assertEquals("PENDING", result.getPO_status());
+        verify(purchaseOrderRepository, times(1)).save(any(PurchaseOrder.class));
     }
 
     @Test
@@ -135,4 +178,50 @@ class PurchaseOrderServiceImplTest {
         verify(purchaseOrderRepository, times(1)).existsById(1);
 
     }
+    @Test
+    void updatePurchaseOrder() throws InvalidInputException {
+        when(purchaseOrderRepository.save(any(PurchaseOrder.class))).thenReturn(purchaseOrders.get(0));
+        when(purchaseOrderRepository.findById(1)).thenReturn(Optional.of(purchaseOrders.get(0)));
+
+
+        PurchaseOrderDTO inputDTO = new PurchaseOrderDTO();
+        inputDTO.setEventid(101);
+        inputDTO.setEventname("Java Fullstack");
+        inputDTO.setVendorid(1001);
+        inputDTO.setVendorname("Tech Solutions");
+        inputDTO.setCdsid("CDS123");
+        inputDTO.setOrderdate(new Date());
+        inputDTO.setOrderamountINR(415000.0); // Provide INR amount
+        inputDTO.setOrderamountdollar(5000.0); // Provide USD amount (both required)
+        inputDTO.setPO_status("PENDING");
+
+        PurchaseOrderDTO result=purchaseOrderService.updatePurchaseOrder(1,inputDTO);
+        assertEquals("PENDING", result.getPO_status());
+
+    }
+
+    /*@Test
+    void getCompletedPurchaseOrders() throws DataNotFoundException {
+        // Create a COMPLETED purchase order for this test
+        PurchaseOrder completedPO = new PurchaseOrder();
+        completedPO.setPO_id(1);
+        completedPO.setCdsid("CDS123");
+        completedPO.setVendorid(1001);
+        completedPO.setPO_status("COMPLETED"); // Set to COMPLETED
+        completedPO.setEventname("Java Fullstack");
+        completedPO.setOrderdate(Date.from(LocalDate.of(2024, 1, 15).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+        completedPO.setOrderamountdollar(5000.0);
+
+        List<PurchaseOrder> completedOrders = Collections.singletonList(completedPO);
+
+        when(purchaseOrderRepository.findAll()).thenReturn(completedOrders);
+
+        List<PurchaseOrderDTO> result = purchaseOrderService.getCompletedPurchaseOrders();
+
+        assertEquals(1, result.size());
+        assertEquals("COMPLETED", result.get(0).getPO_status());
+    }
+*/
+
+
 }

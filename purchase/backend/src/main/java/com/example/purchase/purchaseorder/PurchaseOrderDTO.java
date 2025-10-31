@@ -2,7 +2,17 @@ package com.example.purchase.purchaseorder;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Date;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 
 public class PurchaseOrderDTO {
     @JsonProperty("po_id")
@@ -52,7 +62,7 @@ public class PurchaseOrderDTO {
     @Positive(message = "Negotiation ID must be positive")
     private Integer negotiationid;
 
-    public PurchaseOrderDTO() {
+   /* public PurchaseOrderDTO() {
     }
 
     public PurchaseOrderDTO(Integer PO_id, Integer eventid, String eventname, Integer vendorid,
@@ -71,7 +81,7 @@ public class PurchaseOrderDTO {
         this.prid = prid;
         this.negotiationid = negotiationid;
     }
-
+*/
     public Integer getPO_id() {
         return PO_id;
     }

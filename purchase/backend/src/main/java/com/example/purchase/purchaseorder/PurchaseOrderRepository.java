@@ -22,10 +22,6 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, In
     // UPDATED: Find by cdsid
     List<PurchaseOrder> findByCdsid(String cdsid);
 
-    Optional<PurchaseOrder> findByPurchaserequest_Prid(Integer prid);
-
-    Optional<PurchaseOrder> findByNegotiation_Negotiationid(Integer negotiationid);
-
     @Query("SELECT po FROM PurchaseOrder po WHERE YEAR(po.orderdate) = :year")
     List<PurchaseOrder> findByYear(@Param("year") int year);
 
@@ -34,9 +30,6 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrder, In
 
     @Query("SELECT po FROM PurchaseOrder po WHERE po.PO_status = 'COMPLETED'")
     List<PurchaseOrder> findCompletedOrders();
-
-    @Query("SELECT po FROM PurchaseOrder po WHERE po.orderamountINR BETWEEN :minAmount AND :maxAmount")
-    List<PurchaseOrder> findByAmountRangeINR(@Param("minAmount") Double minAmount, @Param("maxAmount") Double maxAmount);
 
     @Query("SELECT SUM(po.orderamountINR) FROM PurchaseOrder po WHERE po.vendorid = :vendorid")
     Double getTotalOrderAmountByVendor(@Param("vendorid") Integer vendorid);

@@ -20,24 +20,38 @@ public class PurchaseOrderController {
     @Autowired
     private PurchaseOrderService purchaseOrderService;
 
-    @GetMapping("/event/{eventid}")
-    @Operation(summary = "Get purchase orders by event ID")
-    public ResponseEntity<List<PurchaseOrderDTO>> getPurchaseOrdersByEvent(
-            @PathVariable @Parameter(description = "Event ID") Integer eventid) {
-        return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByEvent(eventid));
+    @PostMapping
+    @Operation(summary="created a new purchase order")
+    public ResponseEntity<PurchaseOrderDTO> createPurchaseOrder(@RequestBody PurchaseOrderDTO purchaseOrderDTO)throws InvalidInputException {
+        return new ResponseEntity<>(purchaseOrderService.createPurchaseOrder(purchaseOrderDTO),HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PurchaseOrderDTO> updateStatus(@PathVariable Integer id,@RequestBody PurchaseOrderDTO dto) throws InvalidInputException {
+        return new ResponseEntity<>(purchaseOrderService.updatePurchaseOrder(id,dto),HttpStatus.OK);
+    }
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<PurchaseOrderDTO> rejectStatus(@PathVariable Integer id) throws InvalidInputException {
+        return ResponseEntity.ok(purchaseOrderService.rejectPurchaseOrder(id));
     }
 
     @GetMapping("/cdsid/{cdsid}")
     @Operation(summary = "Get purchase orders by CDSID")
-    public ResponseEntity<List<PurchaseOrderDTO>> getPurchaseOrdersByCdsid(
-            @PathVariable @Parameter(description = "CDSID") String cdsid) {
+    public ResponseEntity<List<PurchaseOrderDTO>> getPurchaseOrdersByCds(@PathVariable String cdsid) throws InvalidInputException {
         return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByCdsid(cdsid));
+    }
+
+    @GetMapping("/event/{eventid}")
+    @Operation(summary = "Get purchase orders by event ID")
+    public ResponseEntity<List<PurchaseOrderDTO>> getPurchaseOrdersByEvent(
+            @PathVariable  Integer eventid) throws InvalidInputException {
+        return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByEvent(eventid));
     }
 
     @GetMapping("/year/{year}")
     @Operation(summary = "Get purchase orders by year")
     public ResponseEntity<List<PurchaseOrderDTO>> getPurchaseOrdersByYear(
-            @PathVariable @Parameter(description = "Year (e.g., 2024)") int year) {
+            @PathVariable  int year) {
         return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByYear(year));
     }
 
@@ -50,20 +64,6 @@ public class PurchaseOrderController {
             @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate) {
         return ResponseEntity.ok(purchaseOrderService.getPurchaseOrdersByDateRange(fromDate, toDate));
     }
-
-    @PostMapping
-    @Operation(summary = "Create new purchase order")
-    public ResponseEntity<PurchaseOrderDTO> createPurchaseOrder(@RequestBody PurchaseOrderDTO dto) {
-        return new ResponseEntity<>(purchaseOrderService.createPurchaseOrder(dto), HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    @Operation(summary = "Update purchase order")
-    public ResponseEntity<PurchaseOrderDTO> updatePurchaseOrder(
-            @PathVariable Integer id, @RequestBody PurchaseOrderDTO dto) {
-        return ResponseEntity.ok(purchaseOrderService.updatePurchaseOrder(id, dto));
-    }
-
 
     @GetMapping
     @Operation(summary = "Get all purchase orders")
@@ -114,15 +114,9 @@ public class PurchaseOrderController {
         return ResponseEntity.ok(purchaseOrderService.getTotalOrderAmountByVendor(vendorid));
     }
 
-    @PutMapping("/{id}/reject")
-    @Operation(summary = "Mark purchase order as rejected")
-    public ResponseEntity<PurchaseOrderDTO> rejectPurchaseOrder(@PathVariable Integer id) {
-        return ResponseEntity.ok(purchaseOrderService.rejectPurchaseOrder(id));
-    }
-
     @PutMapping("/{id}/complete")
     @Operation(summary = "Mark purchase order as completed")
-    public ResponseEntity<PurchaseOrderDTO> completePurchaseOrder(@PathVariable Integer id) {
+    public ResponseEntity<PurchaseOrderDTO> completePurchaseOrder(@PathVariable Integer id) throws InvalidInputException{
         return ResponseEntity.ok(purchaseOrderService.completePurchaseOrder(id));
     }
 

@@ -30,17 +30,69 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     // Currency conversion rate (example: 1 USD = 83 INR)
     private static final double USD_TO_INR_RATE = 83.0;
 
+    // Create purchase order
+    public PurchaseOrderDTO createPurchaseOrder(PurchaseOrderDTO dto) throws InvalidInputException {
+
+        PurchaseOrder po = new PurchaseOrder();
+        mapDTOToEntity(dto,po);
+        if(dto.getOrderamountINR()==null || dto.getOrderamountINR()<=0 || dto.getOrderamountdollar()==null || dto.getOrderamountdollar()<=0) {
+            throw new InvalidInputException("Enter the valid order amount");
+        }
+        else if(dto.getOrderamountINR()!=null && dto.getOrderamountdollar()==null){
+            po.setOrderamountdollar(dto.getOrderamountINR()/USD_TO_INR_RATE);
+        } else if (dto.getOrderamountdollar()!=null && dto.getOrderamountINR()==null) {
+            po.setOrderamountINR(dto.getOrderamountdollar()*USD_TO_INR_RATE);
+        }
+        PurchaseOrder saved=purchaseOrderRepository.save(po);
+        return convertToDTO(saved);
+
+    }
+
+    // Update purchase order
+    public PurchaseOrderDTO updatePurchaseOrder(Integer id, PurchaseOrderDTO dto) throws InvalidInputException {
+        PurchaseOrder po = purchaseOrderRepository.findById(id)
+                .orElseThrow(() -> new InvalidInputException("Purchase Order not found with id: " + id));
+        mapDTOToEntity(dto, po);
+
+        // Auto-calculate currency conversion if one amount is provided
+        if (dto.getOrderamountINR() != null && dto.getOrderamountdollar() == null) {
+            po.setOrderamountdollar(dto.getOrderamountINR() / USD_TO_INR_RATE);
+        } else if (dto.getOrderamountdollar() != null && dto.getOrderamountINR() == null) {
+            po.setOrderamountINR(dto.getOrderamountdollar() * USD_TO_INR_RATE);
+        }
+
+        PurchaseOrder updated = purchaseOrderRepository.save(po);
+        return convertToDTO(updated);
+    }
+
+    // Reject purchase order
+    public PurchaseOrderDTO rejectPurchaseOrder(Integer id) throws InvalidInputException {
+        PurchaseOrder po = purchaseOrderRepository.findById(id)
+                .orElseThrow(() -> new InvalidInputException("Purchase Order not found with id: " + id));
+        po.setPO_status("REJECTED");
+        PurchaseOrder updated = purchaseOrderRepository.save(po);
+        return convertToDTO(updated);
+    }
+
+
     // Get purchase orders by event
-    public List<PurchaseOrderDTO> getPurchaseOrdersByEvent(Integer eventid) {
-        return purchaseOrderRepository.findByEventid(eventid).stream()
-                .map(this::convertToDTO)
+    public List<PurchaseOrderDTO> getPurchaseOrdersByEvent(Integer eventId)throws InvalidInputException {
+        if(purchaseOrderRepository.findByEventid(eventId).isEmpty()){
+            throw new InvalidInputException("Purchase Order not found with EventId: " + eventId);
+        }
+        return purchaseOrderRepository.findByEventid(eventId).stream()
+                .map(purchaseOrder -> convertToDTO(purchaseOrder))
                 .collect(Collectors.toList());
     }
 
     // Get purchase orders by cdsid (UPDATED)
-    public List<PurchaseOrderDTO> getPurchaseOrdersByCdsid(String cdsid) {
+    public List<PurchaseOrderDTO> getPurchaseOrdersByCdsid(String cdsid) throws InvalidInputException {
+
+        if(purchaseOrderRepository.findByCdsid(cdsid).isEmpty()){
+            throw new InvalidInputException("Purchase Order not found with CDSID: " + cdsid);
+        }
         return purchaseOrderRepository.findByCdsid(cdsid).stream()
-                .map(this::convertToDTO)
+                .map(purchaseOrder -> convertToDTO(purchaseOrder))
                 .collect(Collectors.toList());
     }
 
@@ -57,6 +109,11 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+    public List<PurchaseOrderDTO> getAllPurchaseOrders() {
+        return purchaseOrderRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     // Get completed purchase orders
     public List<PurchaseOrderDTO> getCompletedPurchaseOrders() throws DataNotFoundException {
@@ -64,51 +121,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
             throw new DataNotFoundException("No completed Purchase Orders found.");
         }
         return purchaseOrderRepository.findCompletedOrders().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    // Create purchase order
-    public PurchaseOrderDTO createPurchaseOrder(PurchaseOrderDTO dto) {
-
-
-        PurchaseOrder po = new PurchaseOrder();
-        mapDTOToEntity(dto, po);
-
-        // Auto-calculate currency conversion if one amount is provided
-        if (dto.getOrderamountINR() != null && dto.getOrderamountdollar() == null) {
-            po.setOrderamountdollar(dto.getOrderamountINR() / USD_TO_INR_RATE);
-        } else if (dto.getOrderamountdollar() != null && dto.getOrderamountINR() == null) {
-            po.setOrderamountINR(dto.getOrderamountdollar() * USD_TO_INR_RATE);
-        }
-
-        PurchaseOrder saved = purchaseOrderRepository.save(po);
-        return convertToDTO(saved);
-    }
-
-    // Update purchase order
-    public PurchaseOrderDTO updatePurchaseOrder(Integer id, PurchaseOrderDTO dto) {
-
-
-        PurchaseOrder po = purchaseOrderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Purchase Order not found with id: " + id));
-        mapDTOToEntity(dto, po);
-
-        // Auto-calculate currency conversion if one amount is provided
-        if (dto.getOrderamountINR() != null && dto.getOrderamountdollar() == null) {
-            po.setOrderamountdollar(dto.getOrderamountINR() / USD_TO_INR_RATE);
-        } else if (dto.getOrderamountdollar() != null && dto.getOrderamountINR() == null) {
-            po.setOrderamountINR(dto.getOrderamountdollar() * USD_TO_INR_RATE);
-        }
-
-        PurchaseOrder updated = purchaseOrderRepository.save(po);
-        return convertToDTO(updated);
-    }
-
-
-
-    public List<PurchaseOrderDTO> getAllPurchaseOrders() {
-        return purchaseOrderRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -150,24 +162,15 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
     // Complete purchase order
-    public PurchaseOrderDTO completePurchaseOrder(Integer id) {
+    public PurchaseOrderDTO completePurchaseOrder(Integer id) throws InvalidInputException{
         PurchaseOrder po = purchaseOrderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Purchase Order not found with id: " + id));
+                .orElseThrow(() -> new InvalidInputException("Purchase Order not found with id: " + id));
         po.setPO_status("COMPLETED");
         PurchaseOrder updated = purchaseOrderRepository.save(po);
         return convertToDTO(updated);
     }
 
-    // Reject purchase order
-    public PurchaseOrderDTO rejectPurchaseOrder(Integer id) {
-        PurchaseOrder po = purchaseOrderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Purchase Order not found with id: " + id));
-        po.setPO_status("REJECTED");
-        PurchaseOrder updated = purchaseOrderRepository.save(po);
-        return convertToDTO(updated);
-    }
-
-    // Delete purchase order
+      // Delete purchase order
     public void deletePurchaseOrder(Integer id) {
         if (!purchaseOrderRepository.existsById(id)) {
             throw new RuntimeException("Purchase Order not found with id: " + id);
